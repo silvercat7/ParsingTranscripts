@@ -26,12 +26,8 @@ public class ParseTranscript {
     }
 
     public String[] parseFile(String fileName) throws IOException {
-        String data = readFile(fileName);
+        String data = new String(Files.readAllBytes(Paths.get(fileName)));
         return data.split("\n");
-    }
-
-    public String readFile(String fileName) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(fileName)));
     }
 
     public double parseStartTime(String timeLine) {
@@ -77,17 +73,6 @@ public class ParseTranscript {
         return nameLine.substring(index + 2);
     }
 
-    public static void writeDataToFile(String filePath, String data) {
-        try (FileWriter f = new FileWriter(filePath);
-             BufferedWriter b = new BufferedWriter(f);
-             PrintWriter writer = new PrintWriter(b)) {
-            writer.println(data);
-        } catch (IOException error) {
-            System.err.println("there was a problem writing to the file " + filePath);
-            error.printStackTrace();
-        }
-    }
-
     public void outputSummaryStatistics() {
         try {
             PrintWriter summaryStatistics = new PrintWriter(new FileWriter("summaryStatistics.txt"));
@@ -127,6 +112,7 @@ public class ParseTranscript {
                     statement = entry.getStatement();
                 }
             }
+            condensedTranscript.println(speaker + ": " + statement);
             condensedTranscript.close();
         } catch (IOException error) {
             error.printStackTrace();
@@ -190,14 +176,12 @@ public class ParseTranscript {
     }
 
     public double averageLengthOfSpeechEvent(String speaker) {
-        double allLengths = 0;
         double allEntries = 0;
         for (TranscriptEntry entry : entries) {
             if (entry.getSpeaker().equals(speaker)) {
-                allLengths += entry.getDuration();
                 allEntries++;
             }
         }
-        return (allLengths/allEntries)/60;
+        return getSpeakerTime(speaker)/allEntries;
     }
 }
